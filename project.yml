@@ -1,0 +1,91 @@
+name: SSHClient
+options:
+  bundleIdPrefix: com.kairo
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  SSHCore:
+    path: Packages/SSHCore
+  SwiftTerm:
+    url: https://github.com/migueldeicaza/SwiftTerm
+    exactVersion: 1.99.3
+
+targets:
+  SSHClient:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+        excludes:
+          - Info.plist
+          - App.entitlements
+    dependencies:
+      - package: SSHCore
+      - package: SwiftTerm
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleName: K-SSH
+        CFBundleDisplayName: K-SSH
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        LSApplicationCategoryType: public.app-category.developer-tools
+        NSHumanReadableCopyright: ""
+    entitlements:
+      path: App/App.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.network.server: true
+        com.apple.security.files.user-selected.read-write: true
+        com.apple.security.files.bookmarks.app-scope: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kairo.SSHClient
+        PRODUCT_NAME: SSHClient
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+
+  SSHClientTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: AppTests
+    dependencies:
+      - target: SSHClient
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kairo.SSHClientTests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  SSHClient:
+    build:
+      targets:
+        SSHClient: all
+        SSHClientTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - SSHClientTests
+    archive:
+      config: Release
